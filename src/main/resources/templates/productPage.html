@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Product Page</title>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Product Page</title>
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault(); // Verhindert das Standard-Formular-Absenden
+            
+            var form = event.target;
+            var rows = form.querySelectorAll('tbody tr');
+
+            var formData = new FormData();
+
+            rows.forEach(row => {
+                var productName = row.querySelector('input[name="productNames"]').value;
+                var price = parseFloat(row.querySelector('input[name="prices"]').value);
+                var quantity = parseInt(row.querySelector('input[name="quantities"]').value, 10);
+
+                if (quantity > 0) {
+                    formData.append('productNames', productName);
+                    formData.append('prices', price);
+                    formData.append('quantities', quantity);
+                }
+            });
+
+            fetch('/productPage', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/productPage';
+                    } else {
+                    console.error('Fehler beim Absenden des Formulars.');
+                }
+            }).catch(error => {
+                console.error('Netzwerkfehler:', error);
+            });
+        }
+    </script>
+
+</head>
+<body>
+    <h1>Product Page</h1>
+    <div th:if="${#lists.isEmpty(items)} == false">
+
+    <form th:action="@{/productPage}" onsubmit="handleSubmit(event)" method="post">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>In Stock</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${items}">
+                    <td th:text="${item.name}">Item Name</td>
+                    <td th:text="${item.amount}">Amount</td>
+                    <td th:text="${item.price}">Price</td>
+                    <td>
+                        <input type="hidden" id="productName" name="productNames" th:value="${item.name}" />
+                        <input type="hidden" name="prices" th:value="${item.price}" />
+                        <input type="number" name="quantities" value="0" step="1" min="0" th:max="${item.amount}" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit">Add to Cart</button>
+    </form>
+    </div>
+    <a href="/addProduct">Add More Products</a>  
+    <a href="/cart">See your Cart</a> 
+</body>
+</html>
