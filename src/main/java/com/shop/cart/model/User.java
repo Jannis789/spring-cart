@@ -1,39 +1,60 @@
 package com.shop.cart.model;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
 public class User implements UserDetails {
-    private String username;
-    private String password;
-    private Set<String> roles = new HashSet<>();
 
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String username;
+
+    private String password;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Role> roles = new HashSet<>();
+
+    // Default constructor
+    public User() {}
 
     public User(String username, String password) {
         this.username = username;
-        this.password = passwordEncoder.encode(password);
+        this.password = password;
     }
 
-    public void grantRole(String role) {
+    // Getters and setters
+
+    public void addRole(Role role) {
         this.roles.add(role);
     }
 
+    // UserDetails methods
     @Override
-    public String getPassword() {
-        return password;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+        }
+        return authorities;
     }
 
     @Override
     public String getUsername() {
         return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -55,13 +76,4 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        for (String role : roles) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-        }
-        return authorities;
-    }
-
 }
