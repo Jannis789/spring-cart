@@ -1,6 +1,8 @@
 package com.shop.cart.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
 public class Role {
@@ -15,15 +17,17 @@ public class Role {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Default constructor
+    @Transient
+    private GrantedAuthority authority;
+
     public Role() {}
 
-    public Role(String name, User user) {
+    public Role(String name) {
         this.name = name;
-        this.user = user;
     }
 
-    // Getters and setters
+    // Getter und Setter
+
     public Long getId() {
         return id;
     }
@@ -46,5 +50,12 @@ public class Role {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public GrantedAuthority getAuthority() {
+        if (this.authority == null) {
+            this.authority = new SimpleGrantedAuthority("ROLE_" + name.toUpperCase());
+        }
+        return this.authority;
     }
 }

@@ -5,6 +5,7 @@ import com.shop.cart.model.User;
 import com.shop.cart.model.Role;
 import com.shop.cart.repository.UserRepository;
 import com.shop.cart.repository.ItemRepository;
+import com.shop.cart.repository.RoleRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,9 +15,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Optional;
 
 @Controller
@@ -26,37 +33,41 @@ public class CartController {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final RoleRepository roleRepository;
 
-    public CartController(PasswordEncoder passwordEncoder, UserRepository userRepository, ItemRepository itemRepository) {
+    public CartController(  PasswordEncoder passwordEncoder, 
+                            UserRepository userRepository, 
+                            ItemRepository itemRepository,
+                            RoleRepository roleRepository
+                         ) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
+        this.roleRepository = roleRepository;
         // Adding admin and regular users to the database
         // createUserIfNotExists("admin", "root", "admin");
         // createUserIfNotExists("testUser", "testPassword", "user");
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            System.out.println("Username: " + user.getUsername());
-            System.out.println("Password: " + user.getPassword());
-        }
     }
-
-    private void createUserIfNotExists(String username, String password, String role) {
-        if (userRepository.findByUsername(username).isEmpty()) {
-            User user = new User(username, passwordEncoder.encode(password));
-            Role adminRole = new Role(role, user);
-            user.addRole(adminRole);
-            userRepository.save(user);
-        }
-        System.out.println(userRepository.findByUsername("testUser"));
-    }
-
+    
     // Add Product
     @GetMapping("/addProduct")
     public String showAddProductPage(Model model) {
-        // Admin Authentifizierung muss noch nachgemacht werden s
-        return "addProduct";
-
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpSession session = attr.getRequest().getSession(true);
+        User user = (User) session.getAttribute("user");
+    
+        if (user == null) {
+            return "redirect:/login";
+        }
+    
+        List<String> userRoles = roleRepository.findRoleNamesByUserId(user.getId());
+        System.out.println(userRoles);
+    
+        if (userRoles.stream().anyMatch(role -> role.equals("ROLE_ADMIN"))) {
+            return "addProduct";
+        }
+    
+        return "redirect:/login";
     }
     
 

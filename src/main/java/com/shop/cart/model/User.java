@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 public class User implements UserDetails {
@@ -23,7 +24,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Role> roles = new HashSet<>();
 
-    // Default constructor
+    // Standard-Konstruktoren, Getter und Setter
+
     public User() {}
 
     public User(String username, String password) {
@@ -31,20 +33,16 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    // Getters and setters
-
     public void addRole(Role role) {
         this.roles.add(role);
+        role.setUser(this); // Bidirektionale Beziehung aktualisieren
     }
 
-    // UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
-        }
-        return authorities;
+        return this.roles.stream()
+                .map(Role::getAuthority)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -75,5 +73,23 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    // Getter und Setter
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }
