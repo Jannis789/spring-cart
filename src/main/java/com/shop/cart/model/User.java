@@ -24,8 +24,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Role> roles = new HashSet<>();
 
-    // Standard-Konstruktoren, Getter und Setter
-
     public User() {}
 
     public User(String username, String password) {
@@ -35,9 +33,9 @@ public class User implements UserDetails {
 
     public void addRole(Role role) {
         this.roles.add(role);
-        role.setUser(this); // Bidirektionale Beziehung aktualisieren
     }
 
+    // Implementierung von UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
@@ -57,26 +55,25 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; // Anpassen, falls erforderlich
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true; // Anpassen, falls erforderlich
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true; // Anpassen, falls erforderlich
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true; // Anpassen, falls erforderlich
     }
 
     // Getter und Setter
-
     public Long getId() {
         return id;
     }

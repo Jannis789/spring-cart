@@ -13,21 +13,18 @@ public class Role {
 
     private String name;
 
+    @Transient
+    private GrantedAuthority authority;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Transient
-    private GrantedAuthority authority;
 
     public Role() {}
 
     public Role(String name) {
         this.name = name;
     }
-
-    // Getter und Setter
-
     public Long getId() {
         return id;
     }
@@ -42,14 +39,6 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public GrantedAuthority getAuthority() {
