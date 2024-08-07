@@ -18,11 +18,11 @@ public class Cart {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
     
     @OneToMany
-    @JoinColumn(name = "cart_item_id")
+    @JoinColumn(name = "cart_item_id", referencedColumnName = "id")
     private Set<CartItem> cartItem = new HashSet<>();
 
     private int totalPieces;

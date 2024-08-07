@@ -20,12 +20,12 @@ public class User implements UserDetails {
     private String username;
 
     private String password;
-
+    
+    // mappedBy: Instanzen vom Set des Types Role sind fremdartig
     @OneToMany(mappedBy = "user")
     private Set<Role> roles = new HashSet<>();
 
     public User() {}
-
     public User(String username, String password) {
         this.username = username;
         this.password = password;
@@ -88,5 +88,9 @@ public class User implements UserDetails {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public boolean hasRoles(Role role) {
+        return this.getRoles().contains(role);
     }
 }

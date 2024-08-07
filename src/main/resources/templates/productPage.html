@@ -3,44 +3,13 @@
 <head>
     <title>Product Page</title>
     <script>
-        function handleSubmit(event) {
-
-            var form = event.target;
-            var itemContainer = form.querySelectorAll('#itemContainer');
-
-            var formData = new FormData();
-
-            itemContainer.forEach(row => {
-                var productName = row.querySelector('input[name="productNames"]').value;
-                var price = parseFloat(row.querySelector('input[name="prices"]').value);
-                var quantity = parseInt(row.querySelector('input[name="quantities"]').value, 10);
-
-                if (quantity > 0) {
-                    formData.append('productNames', productName);
-                    formData.append('prices', price);
-                    formData.append('quantities', quantity);
-                }
-            });
-
-            fetch('/productPage', {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = '/productPage';
-                } else {
-                    console.error('Fehler beim Absenden des Formulars.');
-                }
-            }).catch(error => {
-                console.error('Netzwerkfehler:', error);
-            });
-        }
+        
     </script>
 </head>
 <body>
     <h1>Product Page</h1>
     <div th:if="${#lists.isEmpty(items)} == false">
-        <form th:action="@{/productPage}" onsubmit="handleSubmit(event)" method="post">
+        <form th:action="@{/productPage}" method="post">
             <table>
                 <thead>
                     <tr>
