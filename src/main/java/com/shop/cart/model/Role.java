@@ -23,7 +23,7 @@ public class Role {
     public Role() {}
 
     public Role(String name) {
-        this.name = name;
+        this.name = "ROLE_" + name.toUpperCase();
     }
     public Long getId() {
         return id;
@@ -46,5 +46,9 @@ public class Role {
             this.authority = new SimpleGrantedAuthority("ROLE_" + name.toUpperCase());
         }
         return this.authority;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -32,7 +32,8 @@ public class User implements UserDetails {
     }
 
     public void addRole(Role role) {
-        this.roles.add(role);
+        roles.add(role);
+        role.setUser(this);
     }
 
     // Implementierung von UserDetails
@@ -51,26 +52,6 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return password;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true; // Anpassen, falls erforderlich
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true; // Anpassen, falls erforderlich
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true; // Anpassen, falls erforderlich
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true; // Anpassen, falls erforderlich
     }
 
     // Getter und Setter

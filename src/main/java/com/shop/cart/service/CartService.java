@@ -1,33 +1,64 @@
 package com.shop.cart.service;
-import com.shop.cart.repository.CartItemRepository;
-import com.shop.cart.model.CartItem;
+
+import com.shop.cart.model.Cart;
+import com.shop.cart.model.CartItemDetail;
+import com.shop.cart.repository.ItemRepository;
 import com.shop.cart.model.Item;
 import com.shop.cart.model.User;
+import com.shop.cart.repository.CartRepository;
+import com.shop.cart.repository.CartItemDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.lang.Math;
+
+import java.util.List;
+import java.util.Optional;
 @Service
 public class CartService {
 
     @Autowired
-    private CartItemRepository cartItemRepository;
+    private CartRepository cartRepository;
+
+    @Autowired
+    private CartItemDetailRepository cartItemDetailRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @Transactional
-    public void addItemToCart(User user, Item item, int quantity) {
-        if (user == null || item == null) {
-            throw new IllegalArgumentException("User and Item must not be null");
+    public void createOrUpdateCart(User user, Item item, int quantity) {
+
+        Optional<CartItemDetail> existingCartItemDetail = cartItemDetailRepository.findByItem(item);
+        if (existingCartItemDetail.isPresent()) {
+            int newQuantity = Math.min(existingCartItemDetail.get().getQuantity() + quantity, existingCartItemDetail.get().getItem().getAmount());
+            existingCartItemDetail.get().setQuantity(newQuantity);
+            return;
         }
 
-        CartItem cartItem = cartItemRepository.findByUserAndItem(user, item);
+        CartItemDetail cartItemDetail = new CartItemDetail(item, quantity);
+        cartItemDetailRepository.save(cartItemDetail);
 
-        if (cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
-        } else {
-            cartItem = new CartItem(item, user, quantity);
+        Cart cart = new Cart(user, cartItemDetail);
+        cartRepository.save(cart);
+    }
+
+    @Transactional
+    public void deleteProduct(String name) {
+        Item item = itemRepository.getItemByName(name);
+        Optional<CartItemDetail> cid = cartItemDetailRepository.findByItem(item);
+
+        if (cid.isPresent()) {
+            cartRepository.deleteByCartItemDetail(cid.get());
         }
+    }
 
-        cartItemRepository.save(cartItem);
+    public float getPriceForUser(User user) {
+        float price = 0;
+        List<CartItemDetail> cartItemDetails = cartRepository.findCartItemDetailsByUser(user);
+        for (CartItemDetail detail : cartItemDetails) {
+            price += detail.getItem().getPrice() * detail.getQuantity();
+        }
+        return price;
     }
 }
 

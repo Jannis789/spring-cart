@@ -13,12 +13,26 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests(authorizeRequests ->
+                authorizeRequests
+                    .anyRequest().permitAll() // Erlaube Zugriff auf alle Seiten ohne Authentifizierung
+            )
+            .formLogin(formLogin ->
+                formLogin
+                    .disable() // Deaktiviere Form-Login
+            )
+            .logout(logout ->
+                logout
+                    .disable() // Deaktiviere Logout
+            )
+            .csrf(csrf -> csrf.disable()); // Deaktiviere CSRF-Schutz, falls nötig
+
         return http.build();
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // BCrypt für Passwort-Hashing
     }
 }

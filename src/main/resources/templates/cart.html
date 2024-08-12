@@ -2,11 +2,61 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Checkout</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Funktion zur Bearbeitung von Änderungen in den Mengenfeldern
+            document.querySelectorAll('input[name="quantities"]').forEach(input => {
+                input.addEventListener('change', (event) => {
+                    const row = event.target.closest('tr');
+                    const name = row.querySelector('td:first-child').textContent.trim();
+                    const quantity = event.target.value;
+
+                    // POST-Anfrage senden
+                    fetch('/updateQuantities', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'name': name,
+                            'quantity': quantity
+                        })
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        // Optional: die Seite aktualisieren oder den Inhalt aktualisieren
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
 </head>
 <body>
-    <h1>Your Price</h1> <p th:text="${price}"></p>
+    <h1>Your Price</h1>
+    <form id="checkoutForm" th:action="@{/updateQuantities}" method="post">
+        <table>
+            <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+            <tr th:each="item : ${cartItemDetails}">
+                <td th:text="${item.item.name}"></td>
+                <td><input type="number" name="quantities" th:value="${item.quantity}" step="1" min="0" /></td>
+                <td th:text="${item.quantity * item.item.price}"></td>
+                <td><a th:href="@{/deleteProduct(name=${item.item.name})}">Remove</a></td>
 
-    <a href="/addProduct">Add new Products</a>
-    <a href="/productPage">View Product Page</a>
+            </tr>
+        </table>
+
+        <br>
+        <p th:text="${price}"></p>
+        <a href="/addProduct">Add new Products</a>
+        <a href="/productPage">View Product Page</a>
+    </form>
 </body>
 </html>
